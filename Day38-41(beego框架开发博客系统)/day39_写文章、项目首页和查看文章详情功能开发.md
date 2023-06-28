@@ -7,7 +7,7 @@
 ## 一 写文章功能开发
 ### 1.1 数据库表设计
 首先我们先设计数据库，用户提交的文章，包含标题，标签，简介，内容， 创建时间等。
-在mysqlUtils.go文件中，添加article表的操作：
+在utils.go文件中，添加article表的操作：
 
 ```go
 //创建文章表
@@ -115,7 +115,7 @@ func (this *AddArticleController) Post() {
 如果用户请求写文章路径，会展示write_article.html页面。添加完信息后，点击提交按钮，进行提交数据。
 
 ### 1.4 注册添加文章路由
-然后注册一个新的路由：
+然后注册一个新的路由，router.go添加：
 ```go
 //写文章
 beego.Router("/article/add", &controllers.AddArticleController{})
@@ -295,7 +295,7 @@ func QueryArticlesWithCon(sql string) ([]Article, error) {
 }
 ```
 #### 2.1.3 首页显示内容结构体定义
-在models目录下创建一个go文件，用来控制首页显示内容：
+在models目录下创建一个home_model.go文件，用来控制首页显示内容：
 
 ```go
 type HomeBlockParam struct {
@@ -320,6 +320,17 @@ type HomeBlockParam struct {
 type TagLink struct {
 	TagName string
 	TagUrl  string
+}
+
+/**
+ * 分页的结构体
+ */
+type HomeFooterPageCode struct {
+	HasPre   bool
+	HasNext  bool
+	ShowPage string
+	PreLink  string
+	NextLink string
 }
 ```
 我们需要将从数据库中查询出来的数据，转为对应的结构体对象，所以先设计结构体，这里我们需要考虑如果用户是登录状态，那么是可以修改或删除某一篇文章。当然，如果没有登录，那么只能查看。所以在设计结构体的时候，我们直接创建了修改和删除的链接字段。
@@ -399,6 +410,35 @@ func createTagsLinks(tags string) []TagLink {
 </div>
 ```
 我们现实了从数据中查询出的文章的数据，如果用户是登录状态，那么我们现实删除和修改，因为用户有这两个权限，否则就不显示。
+home.html修改为
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>首页</title>
+    <link href="../static/css/blogsheet.css" rel="stylesheet">
+</head>
+<body>
+{{template "block/nav.html" .}}
+
+<div id="main">
+{{.Content}}
+
+{{if .HasFooter}}
+    <div id="home-footer">
+        <a {{if .PageCode.HasPre}}href="{{.PageCode.PreLink}}" {{else}} class="disable" {{end}}>上一页</a>
+        <span>{{.PageCode.ShowPage}}页</span>
+        <a {{if .PageCode.HasNext}}href="{{.PageCode.NextLink}}" {{else}} class="disable" {{end}}>下一页</a>
+    </div>
+{{end}}
+
+
+</div>
+
+</body>
+</html>
+```
 
 #### 2.1.5 项目运行
 ##### 2.1.5.1 准备测试数据
@@ -866,11 +906,14 @@ var DefaultHTMLConfig = HTMLConfig{
 </head>
 ```
 #### 3.4.2 添加Markdown语法转换方法
-接下来在utils目录下，myUtils.go文件中添加方法：
+接下来在utils目录下，utils.go文件中添加方法：
 
 ```go
 func SwitchMarkdownToHtml(content string) template.HTML {
-	markdown := blackfriday.MarkdownCommon([]byte(content))
+	// 旧版本
+	//markdown := blackfriday.MarkdownCommon([]byte(content))
+	// 新版本
+	markdown :=  blackfriday.Run([]byte(content))
 
 	//获取到html文档
 	doc, _ := goquery.NewDocumentFromReader(bytes.NewReader(markdown))
@@ -902,6 +945,7 @@ func (this *ShowArticleController) Get() {
 	this.TplName="show_article.html"
 }
 ```
+http://192.168.1.19:8080/article/4
 
 ### 3.5 项目运行效果
 重启项目后，然后刷新页面：

@@ -103,7 +103,7 @@ func QueryArticlesWithTag(tag string) ([]Article, error) {
 上节内容我们学习了首页扩功能，本节课我们继续开发实现新的功能--文件上传和图片展示功能。在实际案例中，提供有相册展示功能，相册功能展示的图片需要用到文件上传，我们来实际开发实现。
 
 ### 2.1 创建数据表
-首先我们要在数据库中创建数据表，要想存储图片，我们需要图片的id，图片的路径位置，图片的名字等等。所在在utils工具包下的mysqlUtil.go文件中，添加创建数据表的方法：
+首先我们要在数据库中创建数据表，要想存储图片，我们需要图片的id，图片的路径位置，图片的名字等等。所在在utils工具包下的utils.go文件中，添加创建数据表的方法：
 
 ```go
 //--------图片--------
@@ -139,7 +139,6 @@ func InitMysql() {
 package controllers
 import (
 	"myblog/models"
-	"github.com/opentracing/opentracing-go/log"
 )
 type AlbumController struct {
 	BaseController
@@ -151,7 +150,7 @@ func (this *AlbumController) Get() {
 
 #### 2.2.2 视图层实现
 ##### 2.2.2.1 添加html文件
-接下来我们去写html页面，在views目录下创建一个新的html页面：
+接下来我们去写html页面，在views目录下创建一个新的album.html页面：
 ```html
 <!DOCTYPE html>
 <html lang="en">
@@ -315,6 +314,7 @@ func InsertAlbum(album Album) (int64, error) {
 ```
 
 #### 2.2.6 项目运行
+因为数据库只初始化一次，所以记得需要重启项目！！！！！
 重启项目后，点击图片按钮，然后选择一张图片：
 ![文件上传效果](./img/WX20190524-114125@2x.png)
 
@@ -369,10 +369,13 @@ func (this *AlbumController) Get() {
 #### 2.3.3 修改视图层
 最后我们还要修改一下html页面，在album.html中，添加以下内容：
 ```html
-<div id="album-box">
-    {{range .Album}}
-        <div class="album-item" style='background-image: url("{{.Filepath}}");'></div>
-    {{end}}
+<div id="main">
+....
+    <div id="album-box">
+        {{range .Album}}
+            <div class="album-item" style='background-image: url("{{.Filepath}}");'></div>
+        {{end}}
+    </div>
 </div>
 ```
 

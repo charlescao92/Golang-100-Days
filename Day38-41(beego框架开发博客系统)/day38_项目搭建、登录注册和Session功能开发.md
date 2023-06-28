@@ -41,7 +41,7 @@ runmode = dev
 首先我们先在创建一个数据库：
 ![数据库创建](./img/WX20190520-063304@2x.png)
 
-我们先创建一个工具包utils，然后创建一个go文件，用于做mysql的工具类，里面提供连接数据库和创建表的功能。
+我们先创建一个工具包utils，然后创建一个utils.go文件，用于做mysql的工具类，里面提供连接数据库和创建表的功能。
 
 首先提供一个初始化方法：
 ```
@@ -359,13 +359,11 @@ func (this *RegisterController) Post() {
 否则再进行注册，出于对密码安全的考虑，我们可以在数据库中存储密码的md5加密数据。
 
 #### 1.2.10 工具方法
-所以在工具包中，再添加一个工具类：myUtils.go
+utils.go继续添加：
 
 ```go
-package utils
 
 import (
-	"fmt"
 	"crypto/md5"
 )
 
@@ -604,7 +602,7 @@ func (this *LoginController) Post() {
 	...
 	if id > 0 {
 		/*
-		设置了session后悔将数据处理设置到cookie，然后再浏览器进行网络请求的时候回自动带上cookie
+		设置了session后将数据处理设置到cookie，然后再浏览器进行网络请求的时候回自动带上cookie
 		因为我们可以通过获取这个cookie来判断用户是谁，这里我们使用的是session的方式进行设置
 		 */
 		this.SetSession("loginuser", username)
@@ -632,6 +630,7 @@ func init() {
 接下来创建一个新的Controller，HomeController，用于控制首页。但是在这之前，我们先设置一个父Controller用于获取session，查看用户是否登录。
 
 先创建一个go文件：base_controller.go
+先定义个BaseController，里面额外设置两个字段，IsLogin表示用户是否登录，Loginuser表示用户名。
 ```go
 type BaseController struct {
 	beego.Controller
@@ -640,24 +639,7 @@ type BaseController struct {
 }
 ```
 
-先定义个BaseController，里面额外设置两个字段，IsLogin表示用户是否登录，Loginuser表示用户名。
-
-```go
-//判断是否登录
-func (this *BaseController) Prepare() {
-	loginuser := this.GetSession("loginuser")
-	fmt.Println("loginuser---->", loginuser)
-	if loginuser != nil {
-		this.IsLogin = true
-		this.Loginuser = loginuser
-	} else {
-		this.IsLogin = false
-	}
-	this.Data["IsLogin"] = this.IsLogin
-}
-```
-
-接下类，重写Prepare()方法，用于获取session。
+接下来，重写Prepare()方法，用于获取session。
 
 ```go
 //判断是否登录

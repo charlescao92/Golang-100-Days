@@ -1,6 +1,8 @@
 package controllers
 
-import "github.com/astaxie/beego"
+import (
+	beego "github.com/beego/beego/v2/server/web"
+)
 
 type ChangelessController struct {
 	beego.Controller

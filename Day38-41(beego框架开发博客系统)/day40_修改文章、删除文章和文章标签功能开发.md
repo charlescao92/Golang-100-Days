@@ -7,7 +7,7 @@
 
 ## 一 修改文章功能开发
 ### 1.1 添加修改文章功能路由
-首先我们先添加一个路由：
+首先我们先添加一个路由router.go：
 ```go
 func init() {
     ...
@@ -176,7 +176,7 @@ func deleteArticleWithArtId(artID int) (int64, error) {
 	return utils.ModifyDB("delete from article where id=?", artID)
 }
 ```
-删除的时候，肯定是根据文章的ID来删除，当点击删除按钮的时候，可以传过来文章ID。
+删除的时候，肯定是根据文章的ID来删除，当点击删除按钮的时候，可以传过来文章ID。home_block.html
 
 ```html
 {{if .IsLogin}}
