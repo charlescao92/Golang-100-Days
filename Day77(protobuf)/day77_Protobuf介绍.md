@@ -100,6 +100,11 @@ Go语言中有对应的实现Protobuf协议的库，Github地址：[https://gith
 * **2、配置环境变量**
 protoc编译器正常运行需要进行环境变量配置，将protocke执行文件所在目录添加到当前系统的环境变量中。windows系统下可以直接在Path目录中进行添加；macOS系统下可以将protoc可执行文件拷贝至**/usr/local/include**目录下。具体的对应的系统的环境变量配置可以阅读解压后与bin目录同级的readme.txt的文件内容。
 
+或者直接 
+```
+sudo apt  install protobuf-compiler
+```
+
 ### 2.2、安装
 通过如下命令安装protoc-gen-go库：
 ```
@@ -142,7 +147,7 @@ Order消息格式有3个字段，在消息中承载的数据分别对应每一�
     ```
     syntax = "proto2";
     package example;
-
+    option go_package="/example";
     message Person {
         required string Name = 1;
         required int32 Age = 2;
@@ -153,22 +158,40 @@ Order消息格式有3个字段，在消息中承载的数据分别对应每一�
 * 2、编译.proto文件，生成Go语言文件。执行如下命令：
     
     ```
-    protoc --go_out = . test.proto
+    protoc --go_out = . person.proto
     ```
-执行 protoc --go_out=. test.proto 生成对应的 person.pb.go 文件。并构建对应的example目录，存放生成的person.pb.go文件。
+
+不加option go_package="/example";的话可能报错
+```
+buntu2004@ubuntu2004-VirtualBox:~/codes/go_codes/protoc-go-test$ protoc --go_out=. person.proto
+protoc-gen-go: unable to determine Go import path for "person.proto"
+
+Please specify either:
+	• a "go_package" option in the .proto source file, or
+	• a "M" argument on the command line.
+
+See https://developers.google.com/protocol-buffers/docs/reference/go-generated#package for more information.
+
+--go_out: protoc-gen-go: Plugin failed with status code 1.
+
+```
+
+执行 protoc --go_out=. person.proto 生成对应的 person.pb.go 文件。并构建对应的example目录，存放生成的person.pb.go文件。
 ![Proto生成Go语言](http://7xtcwd.com1.z0.glb.clouddn.com/WX20190605-101438@2x.png)
 
 * 3、在程序中使用Protobuf
 在程序中有如下代码：
 
-    ```go
-    package main
-    import (
-    	"fmt"
-    	"ProtocDemo/example"
-    	"github.com/golang/protobuf/proto"
-    	"os"
-    )
+```go
+package main
+
+import (
+    "fmt"
+    "ProtocDemo/example"
+    "github.com/golang/protobuf/proto"
+    "os"
+)
+
 func main() {
 	fmt.Println("Hello World. \n")
 
@@ -182,7 +205,6 @@ func main() {
 	msgDataEncoding, err := proto.Marshal(msg_test)
 	if err != nil {
 		panic(err.Error())
-		return
 	}
 
 	msgEntity := example.Person{}
@@ -197,7 +219,7 @@ func main() {
 	fmt.Printf("年龄：%d\n\n", msgEntity.GetAge())
 	fmt.Printf("国籍：%s\n\n", msgEntity.GetFrom())
 }
-    ```
+```
     
 * **3、执行程序**
 ![运行程序](http://7xtcwd.com1.z0.glb.clouddn.com/WX20190605-102000@2x.png)
@@ -330,3 +352,20 @@ Key 的定义如下：
 可以看到 Key 由两部分组成。第一部分是 field_number，比如消息lm.helloworld中field id 的field_number为1。第二部分为wire_type。表示 Value的传输类型。而wire_type有以下几种类型：
 
 ![wire_type类型](./img/WX20190606-174515@2x.png)
+
+注意当前已经是proto3版本，跟proto2的区别是：
+https://blog.csdn.net/xp178171640/article/details/104842541
+1 在第一回非空白非注释行，写明语法：syntax = “proto3”;
+2 字段规则移除了"required"，所有非repeated的字段都默认为optional(可选的)
+在proto2中required也是不推荐使用的。proto3直接从语法层面移除了required规则。
+3 “repeated”字段默认采用packed编码
+在proto2中，需要明确使用packed=true来为字段指定比较紧凑的packed编码方式。
+4 语言增加go，ruby，JavaNano支持
+5 移除了default选项
+在proto2中，可以使用default选项为某一字段指定默认值。在proto3中，字段的默认值只能根据字段类型由系统决定。默认值全部是约定的，而不再提供默认值的语法。在字段被设置为默认值的时候，该字段不会被序列化，这样可以节省空间，提高效率。
+6 枚举类型的第一个字段必须为0.
+7 移除了对分组的支持。分组的功能完全可以使用消息嵌套方式实现。
+8 旧代码在解析新增字段时，会把不认识的字段丢弃，再序列化后新增的字段就没了。
+在proto2中，旧代码虽然会忽视不认识的新增字段，但并不会丢弃，再序列化的时候那些字段被原样保留。
+9 移除了对扩展的支持，新增了Any类型。
+10 新增了json映射特性。
