@@ -125,7 +125,8 @@ service StudentService {
 ```
 在proto文件中定义了Student、Request消息体和rpc服务。使用micro api网关功能，编译proto文件，需要生成micro文件。编译生成该文件需要使用到一个新的protoc-gen-micro库，安装protoc-gen-micro库命令如下：
 ```go
-go get github.com/micro/protoc-gen-micro
+go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+go install github.com/go-micro/generator/cmd/protoc-gen-micro@latest
 ```
 再次编译proto文件，需要指定两个参数，分别是：go_out和micro_out，详细命令如下：
 ```go
