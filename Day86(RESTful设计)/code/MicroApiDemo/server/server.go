@@ -3,16 +3,17 @@ package main
 import (
 	"MicroApiDemo/proto"
 	"context"
-	"github.com/micro/go-micro"
-	"log"
 	"errors"
 	"fmt"
+	"log"
+
+	"go-micro.dev/v4"
 )
 
 type StudentServiceImpl struct {
 }
 
-//服务实现
+// 服务实现
 func (ss *StudentServiceImpl) GetStudent(ctx context.Context, request *proto.Request, resp *proto.Student) error {
 
 	//tom

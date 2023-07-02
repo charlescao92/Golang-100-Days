@@ -25,7 +25,6 @@ func (os *OrderService) GetOrderInfo(request message.OrderRequest, response *mes
 	if (request.TimeStamp > current) {
 		*response = message.OrderInfo{OrderId: "0", OrderName: "", OrderStatus: "订单信息异常"}
 	} else {
-
 		result := orderMap[request.OrderId]
 		if result.OrderId != "" {
 			*response = orderMap[request.OrderId]

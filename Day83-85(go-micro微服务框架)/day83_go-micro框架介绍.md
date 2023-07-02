@@ -81,20 +81,19 @@ consul环境是go-micro默认使用的服务发现方式。在之前的课程中
 
 可以使用如下命令安装micro的一系列的工具包：
 ```go
-go get -u github.com/micro/micro
+go install github.com/micro/micro/v3@latest
 ```
 
-#### 1.6.4、1Go-micro安装
+#### 1.6.4、Go-micro安装
 使用go-micro框架之前，首先需要安装go-micro框架，使用如下命令：
 
 ```go
-go get github.com/micro/go-micro
+go install go-micro.dev/v4@latest
 ```
 
-安装完毕后，能够在$GOPATH目录下面找到go-micro的源码，如下图所示：
-![安装go-micro](./img/WX20190705-164152@2x.png)
+安装完毕后，能够在$GOPATH目录下面找到go-micro的源码。
 
-go-micro的源码在github上可以找到，链接如下：[https://github.com/micro/go-micro](https://github.com/micro/go-micro)
+go-micro的源码在github上可以找到，链接如下：[https://github.com/go-micro/go-micro](https://github.com/go-micro/go-micro)
 
 ## 二、创建微服务
 ### 2.1、服务的定义
@@ -183,6 +182,7 @@ func main() {
 ```go
 syntax = 'proto3';
 package message;
+option go_package="./message";
 
 //学生数据体
 message Student {
@@ -207,7 +207,8 @@ service StudentService {
 * 安装micro框架的protobuf插件
 
     ```go
-    go get github.com/micro/protobuf/{proto,protoc-gen-go}
+	go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+	go install github.com/go-micro/generator/cmd/protoc-gen-micro@latest
     ```
     通过上述命令可以成功安装proto插件,安装成功后可以在本地环境中的$GOPATH目录中的src/github.com/micro/protobuf中看到新安装的插件。源码目录如下图所示：
     ![micro中的protobuf插件](./img/WX20190826-113159@2x.png)
@@ -215,7 +216,7 @@ service StudentService {
 * 指定micro插件进行编译
 
     ```go
-    protoc --go_out=plugins=micro:. message.proto
+	protoc --proto_path=. --micro_out=. --go_out=:. message/message.proto
     ```
     上述编译命令执行成功，可以在项目目录下的message目录下生成message.pb.go文件，该文件是由protoc编译器自动编译生成，开发者不能修改。message.pb.go如图所示：
     ![编译后的文件](./img/WX20190826-113429@2x.png)
@@ -265,7 +266,7 @@ func main() {
 	service.Init()
 
 	//注册
-message.RegisterStudentServiceHandler(service.Server(), new(StudentManager))
+	message.RegisterStudentServiceHandler(service.Server(), new(StudentManager))
 	
 	//运行
 	err := service.Run()
@@ -285,7 +286,7 @@ func main() {
 	)
 	service.Init()
 
-	studentService := message.NewStudentServiceClient("student_service", service.Client())
+	studentService := message.NewStudentService("student_service", service.Client())
 
 	res, err := studentService.GetStudent(context.TODO(), &message.StudentRequest{Name: "davie"})
 	if err != nil {

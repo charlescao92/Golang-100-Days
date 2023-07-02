@@ -1,11 +1,12 @@
 package main
 
 import (
-	"goMicroCode/message"
 	"context"
 	"fmt"
-	"github.com/micro/go-micro"
+	"goMicroCode/message"
 	"time"
+
+	"go-micro.dev/v4"
 )
 
 func main() {
@@ -16,7 +17,7 @@ func main() {
 
 	service.Init()
 
-	studentService := message.NewStudentServiceClient("student_service", service.Client())
+	studentService := message.NewStudentService("student_service", service.Client())
 
 	res, err := studentService.GetStudent(context.TODO(), &message.StudentRequest{Name: "davie"})
 	if err != nil {

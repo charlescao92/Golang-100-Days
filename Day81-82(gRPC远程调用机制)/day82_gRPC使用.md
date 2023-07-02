@@ -70,7 +70,7 @@ func (x *orderServiceGetOrderInfosClient) Recv() (*OrderInfo, error) {
 type OrderServiceImpl struct {
 }
 
-//获取订单信息s
+//获取订单信息
 func (os *OrderServiceImpl) GetOrderInfos(request *message.OrderRequest, stream message.OrderService_GetOrderInfosServer) error {
 	fmt.Println(" 服务端流 RPC 模式")
 
@@ -130,20 +130,19 @@ for {
 ##### 1.1.7.1 服务端运行结果
 ```go
  服务端流 RPC 模式
-订单序列号ID： 201907300001
-订单详情： {201907300001 衣服 已付款 {} [] 0}
-订单序列号ID： 201907310001
-订单详情： {201907310001 零食 已付款 {} [] 0}
 订单序列号ID： 201907310002
-订单详情： {201907310002 食品 未付款 {} [] 0}
+订单详情： {{{} [] [] <nil>} 0 [] 201907310002 食品 未付款}
+订单序列号ID： 201907300001
+订单详情： {{{} [] [] <nil>} 0 [] 201907300001 衣服 已付款}
+订单序列号ID： 201907310001
+订单详情： {{{} [] [] <nil>} 0 [] 201907310001 零食 已付款}
 ```
 
 ##### 1.1.7.2 客户端运行结果
 ```go
-客户端请求RPC调用：服务端流模式
-读取到的信息： OrderId:"201907310001" OrderName:"\351\233\266\351\243\237" OrderStatus:"\345\267\262\344\273\230\346\254\276" 
-读取到的信息： OrderId:"201907310002" OrderName:"\351\243\237\345\223\201" OrderStatus:"\346\234\252\344\273\230\346\254\276" 
-读取到的信息： OrderId:"201907300001" OrderName:"\350\241\243\346\234\215" OrderStatus:"\345\267\262\344\273\230\346\254\276" 
+读取到的信息： OrderId:"201907310002"  OrderName:"食品"  OrderStatus:"未付款"
+读取到的信息： OrderId:"201907300001"  OrderName:"衣服"  OrderStatus:"已付款"
+读取到的信息： OrderId:"201907310001"  OrderName:"零食"  OrderStatus:"已付款"
 读取结束
 ```
 
@@ -161,12 +160,12 @@ service OrderService {
 ```
 
 #### 1.2.2  编译.proto文件
-使用编译命令编译.protow文件。客户端流模式中也会自动生成服务接口的接口。
+使用编译命令编译.proto文件。客户端流模式中也会自动生成服务接口的接口。
 ##### 1.2.2.1 自动生成的服务流接口实现
 ```go
 type OrderService_AddOrderListServer interface {
 	SendAndClose(*OrderInfo) error
-	Recv() (*OrderRequest, error)
+	Recv() (*OrderInfo, error)
 	grpc.ServerStream
 }
 
@@ -178,8 +177,8 @@ func (x *orderServiceAddOrderListServer) SendAndClose(m *OrderInfo) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-func (x *orderServiceAddOrderListServer) Recv() (*OrderRequest, error) {
-	m := new(OrderRequest)
+func (x *orderServiceAddOrderListServer) Recv() (*OrderInfo, error) {
+	m := new(OrderInfo)
 	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -191,7 +190,7 @@ SendAndClose和Recv方法是客户端流模式下的服务端对象所拥有的�
 ##### 1.2.2.2 自动生成的客户端流接口实现
 ```go
 type OrderService_AddOrderListClient interface {
-	Send(*OrderRequest) error
+	Send(*OrderInfo) error
 	CloseAndRecv() (*OrderInfo, error)
 	grpc.ClientStream
 }
@@ -200,7 +199,7 @@ type orderServiceAddOrderListClient struct {
 	grpc.ClientStream
 }
 
-func (x *orderServiceAddOrderListClient) Send(m *OrderRequest) error {
+func (x *orderServiceAddOrderListClient) Send(m *OrderInfo) error {
 	return x.ClientStream.SendMsg(m)
 }
 
@@ -250,7 +249,6 @@ func (os *OrderServiceImpl) AddOrderList(stream message.OrderService_AddOrderLis
 依然是采用相同的服务注册和监听处理方式对服务进行注册和监听处理。
 ```go
 func main() {
-
 	server := grpc.NewServer()
 	//注册
 	message.RegisterOrderServiceServer(server, new(OrderServiceImpl))
@@ -297,11 +295,6 @@ func main() {
 ##### 1.2.6.1 服务端
 运行案例，程序输出如下：
 ```go
- 客户端流 RPC 模式
-201907300001 衣服 已付款
-201907310001 零食 已付款
-201907310002 食品 未付款
- 读取数据结束 
  客户端流 RPC 模式
 201907300001 衣服 已付款
 201907310001 零食 已付款
@@ -491,6 +484,26 @@ TLS的全称是Transport Layer Security，TLS是SSL的升级版。在使用的�
 在加密过程中：客户端想要向服务器发起链接，首先会先向服务端请求要加密的公钥。获取到公钥后客户端使用公钥将信息进行加密，服务端接收到加密信息，使用私钥对信息进行解密并进行其他后续处理，完成整个信道加密并实现数据传输的过程。
 ##### 2.1.1.2 制作证书
 可以自己在本机计算机上安装openssl，并生成相应的证书。
+当前是go1.20，需要生成SAN的证书
+```
+mkdir keys
+cd keys
+# 生成2048位的RSA私钥
+openssl genrsa -out server.key 2048
+# 创建证书请求文件csr
+openssl req -new -key server.key -out server.csr -subj "/CN=charlescao92.cn"
+首先新建文件server.ext，文件中保存如下内容：
+subjectAltName = DNS:*.charlescao92.cn, DNS:charlescao92.cn, DNS:localhost
+通过添加选项-extfile创建SAN证书
+penssl x509 -req -in server.csr -days 365 -signkey server.key -out server.crt -extfile server.ext
+```
+否则报错
+```
+"transport: authentication handshake failed: tls: failed to verify certificate: x509: certificate relies on legacy Common Name field, use SANs instead"
+```
+https://blog.csdn.net/weixin_42216109/article/details/125582312
+
+如果是以前的go1.15版本以前的，可以直接用下面的
 ```openssl
 openssl ecparam -genkey -name secp384r1 -out server.key
 openssl req -new -x509 -sha256 -key server.key -out server.pem -days 3650
@@ -513,9 +526,17 @@ func (mm *MathManager) AddMethod(ctx context.Context, request *message.RequestAr
 }
 
 func main() {
+	// 方法1
+	// cert, err := tls.LoadX509KeyPair("./keys/server.crt", "./keys/server.key")
+	// if err != nil {
+	// 	grpclog.Fatal("加载在证书文件失败", err)
+	// }
+	// creds := credentials.NewTLS(&tls.Config{
+	// 	Certificates: []tls.Certificate{cert},
+	// })
 
-	//TLS认证
-	creds, err := credentials.NewServerTLSFromFile("./keys/server.pem", "./keys/server.key")
+	// 方法2
+	creds, err := credentials.NewServerTLSFromFile("./keys/server.crt", "./keys/server.key")
 	if err != nil {
 		grpclog.Fatal("加载在证书文件失败", err)
 	}
@@ -536,13 +557,13 @@ func main() {
 ##### 2.1.1.3 编程实现客户端
 ```
 func main() {
-
 	//TLS连接
-	creds, err := credentials.NewClientTLSFromFile("./keys/server.pem", "go-grpc-example")
+	creds, err := credentials.NewClientTLSFromFile("./keys/server.crt", "") // 第二个参数可以填证书的域名
 	if err != nil {
 		panic(err.Error())
 	}
-	//1、Dail连接
+
+	//Dail连接
 	conn, err := grpc.Dial("localhost:8092", grpc.WithTransportCredentials(creds))
 	if err != nil {
 		panic(err.Error())

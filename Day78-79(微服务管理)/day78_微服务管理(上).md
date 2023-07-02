@@ -105,12 +105,20 @@ consul是google开源的一个使用go语言开发的服务发现、配置管理
 
 ![下载Consul](./img/WX20190610-100150@2x.png)
 
-Consul最新版本是v1.5.1版本。
+Consul最新版本是v1.16.0版本。
 
 ## 二、微服务管理--分布式与单点故障
 上节课我们提到了服务的注册于发现机制，可以引入一个服务注册发现组件来实现对服务的管理，完成服务注册，信息查询，存储配置等功能。虽然引入了服务注册发现组件解决了就问题，但是会引入新问题。
 
 ### 2.1、Consul环境配置
+https://developer.hashicorp.com/consul/downloads?product_intent=consul
+ubuntu2004
+```
+wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt update && sudo apt install consul
+```
+
 
 * 1、将下载的consul_1.5.1_darwin_amd64.zip进行解压，解压后得到可执行文件consul。
 
@@ -122,13 +130,21 @@ Consul最新版本是v1.5.1版本。
     
 * 3、测试配置成功
 完成consul的环境配置后，即表示已经将consul完成了安装。可以通过在命令行中运行consul指令验证是否安装成功。打开命令行工具，输入如下指令：
-    
-    ```
-    consul
-    ```
-    ![consul指令](./img/WX20190611-114521@2x.png)
-    在终端中输入**consul**指令，出现如上指令用法及参数提示，即表示consul安装成功。
-    如果得到的是**-bash: consul: command not found**的错误，则表示**path**没有正确设置，需要重新检查consul可执行文件所在路径是否添加到了环境变量PATH中。
+
+```
+$ consul version
+Consul v1.16.0
+Revision 192df66a
+Build Date 2023-06-26T20:07:11Z
+Protocol 2 spoken by default, understands 2 to 3 (agent will automatically use protocol >2 when speaking to compatible agents)
+```
+或者
+```
+consul
+```
+![consul指令](./img/WX20190611-114521@2x.png)
+在终端中输入**consul**指令，出现如上指令用法及数提示，即表示consul安装成功。
+如果得到的是**-bash: consul: command notfound**的错误，则表示**path**没有正确设置，需要新检查consul可执行文件所在路径是否添加到了环境量PATH中。
 
 ### 2.2、主从模式分布式系统
 分布式系统中，一遍采用主从模式进行部署，如下图所示：

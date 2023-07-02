@@ -112,7 +112,7 @@ protoc --go_out=plugins=grpc:. *.proto
 
 ### 2.3、gRPC实现RPC编程
 #### 2.3.1、服务接口实现
-在.proto定义好服务接口并生成对应的go语言文件后，需要对服务接口做具体的实现。定义服务接口具体由OrderServiceImpl进行实现，并实现GetOrderInfo详细内容，服务实现逻辑与前文所述内容相同。不同点是服务接口参数的变化。详细代码实现如下：
+在.proto定义好服务接口并生成对应的go语言文件后，需要对服务接口做具体的实现。定义服务接口具体由OrderServiceImpl进行实现，并实现GetOrderInfo详细内容，服务实现逻辑与前文所述内容相同。不同点是服务接口参数的变化。详细代码(ServerStreamCode)实现如下：
 ```go
 type OrderServiceImpl struct {
 }

@@ -31,7 +31,7 @@ func (mm *MathManager) AddMethod(ctx context.Context, request *message.RequestAr
 func main() {
 
 	//TLS认证
-	creds, err := credentials.NewServerTLSFromFile("./keys/server.pem", "./keys/server.key")
+	creds, err := credentials.NewServerTLSFromFile("./keys/server.crt", "./keys/server.key")
 	if err != nil {
 		grpclog.Fatal("加载在证书文件失败", err)
 	}

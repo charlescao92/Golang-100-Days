@@ -1,28 +1,29 @@
 package main
 
 import (
-	"google.golang.org/grpc"
-	"grpcSSLCode/message"
 	"context"
-	"google.golang.org/grpc/grpclog"
 	"fmt"
+	"grpcSSLCode/message"
+	"log"
+
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/grpclog"
 )
 
 func main() {
-
 	//TLS连接
-	creds, err := credentials.NewClientTLSFromFile("./keys/server.pem", "go-grpc-example")
+	creds, err := credentials.NewClientTLSFromFile("./keys/server.crt", "")
 	if err != nil {
 		panic(err.Error())
 	}
 
 	grpc.WithInsecure()
 
-	//1、Dail连接
+	// 创建 gRPC 连接，指定服务器的地址和凭据
 	conn, err := grpc.Dial("localhost:8092", grpc.WithTransportCredentials(creds))
 	if err != nil {
-		panic(err.Error())
+		log.Fatalf("Failed to dial server: %v", err)
 	}
 	defer conn.Close()
 

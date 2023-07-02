@@ -1,6 +1,6 @@
 syntax = "proto3";
 package message;
-
+option go_package = "./message";
 
 message RequestArgs {
     int32 args1 = 1;

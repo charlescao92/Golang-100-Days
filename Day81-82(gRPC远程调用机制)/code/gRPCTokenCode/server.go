@@ -2,15 +2,16 @@ package main
 
 import (
 	"context"
-	"gRPCTokenCode/message"
 	"fmt"
+	"gRPCTokenCode/message"
+	"net"
+
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/grpclog"
-	"net"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 type MathManager struct {
@@ -43,7 +44,7 @@ func (mm *MathManager) AddMethod(ctx context.Context, request *message.RequestAr
 	result := request.Args1 + request.Args2
 	fmt.Println(" 计算结果是：", result)
 	response = new(message.Response)
-	response.Code = 1;
+	response.Code = 1
 	response.Message = "执行成功"
 	return response, nil
 }
@@ -51,13 +52,13 @@ func (mm *MathManager) AddMethod(ctx context.Context, request *message.RequestAr
 func main() {
 
 	//TLS认证
-	creds, err := credentials.NewServerTLSFromFile("./keys/server.pem", "./keys/server.key")
+	creds, err := credentials.NewServerTLSFromFile("./keys/server.crt", "./keys/server.key")
 	if err != nil {
 		grpclog.Fatal("加载在证书文件失败", err)
 	}
 
 	//实例化grpc server, 开启TLS认证
-	server := grpc.NewServer(grpc.Creds(creds),grpc.UnaryInterceptor())
+	server := grpc.NewServer(grpc.Creds(creds), grpc.UnaryInterceptor(nil))
 
 	message.RegisterMathServiceServer(server, new(MathManager))
 

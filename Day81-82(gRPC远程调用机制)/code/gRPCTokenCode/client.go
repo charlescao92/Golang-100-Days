@@ -1,29 +1,30 @@
 package main
 
 import (
-	"google.golang.org/grpc"
-	"gRPCTokenCode/message"
 	"context"
-	"google.golang.org/grpc/grpclog"
 	"fmt"
+	"gRPCTokenCode/message"
+
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/grpclog"
 )
 
-//token认证
+// token认证
 type TokenAuthentication struct {
 	AppKey    string
 	AppSecret string
 }
 
-//组织token认证的metadata信息
+// 组织token认证的metadata信息
 func (ta *TokenAuthentication) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
 	return map[string]string{
-		"appid":    ta.AppKey,
+		"appid":  ta.AppKey,
 		"appkey": ta.AppSecret,
 	}, nil
 }
 
-//是否基于TLS认证进行安全传输
+// 是否基于TLS认证进行安全传输
 func (a *TokenAuthentication) RequireTransportSecurity() bool {
 	return true
 }
@@ -31,13 +32,13 @@ func (a *TokenAuthentication) RequireTransportSecurity() bool {
 func main() {
 
 	//TLS连接
-	creds, err := credentials.NewClientTLSFromFile("./keys/server.pem", "go-grpc-example")
+	creds, err := credentials.NewClientTLSFromFile("./keys/server.crt", "")
 	if err != nil {
 		panic(err.Error())
 	}
 
 	auth := TokenAuthentication{
-		AppKey:    "hello1",
+		AppKey:    "hello",
 		AppSecret: "20190812",
 	}
 

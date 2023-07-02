@@ -22,7 +22,7 @@
 Micro框架中有API网关的功能。API网关的作用是为微服务做代理，负责将微服务的RPC方法代理成支持HTTP协议的web请求，同时将用户端使用的URL进行暴露。
 
 ### 安装Micro工具
-要想使用go-micro 的api网关功能。需要下载Micro源码并安装Mico。
+要想使用go-micro的api网关功能。需要下载Micro源码并安装Mico。
 
 #### 安装Micro
 可以直接通过go get命令下载并安装,具体命令为：
@@ -51,9 +51,9 @@ go install github.com/micro/micro
 micro系列工具安装成功后，可以通过命令检验查看。
 ```go
 micro --version
-micro version 1.9.1
+micro version v3.12.3
 ```
-如上，输出了micro version 1.9.1即表示micro安装成功。
+如上，输出了micro version v3.12.3即表示micro安装成功。
 
 
 ## Micro API工作原理
@@ -83,6 +83,17 @@ micro api --handler=http
 
 ## 安装go-restful
 可以通过安装go-restful库来实现RESTful风格的路径映射，从而实现HTTP的WEB API服务。安装go-restful的命令如下：
+https://pkg.go.dev/github.com/emicklei/go-restful#section-readme
+使用Go Modules
+As of version v3.0.0 (on the v3 branch), this package supports Go modules.
+import (
+	restful "github.com/emicklei/go-restful/v3"
+)
+不使用Go Modules
+All versions up to v2.*.* (on the master) are not supporting Go modules.
+import (
+	restful "github.com/emicklei/go-restful"
+)
 ```go
 go get github.com/emicklei/go-restful
 ```
@@ -226,4 +237,19 @@ func main() {
 		log.Fatal(err)
 	}
 }
+```
+
+运行 go run rest.go
+```
+$ go run rest.go 
+2023-07-02 23:21:41  file=web/service.go:259 level=info Listening on [::]:3917
+```
+成功后，根据上面的监听端口查询(也可以rest.go指定端口)：
+```
+$ curl -x GET http://localhost:3917/student/davie
+{
+ "name": "davie",
+ "grade": 80,
+ "classes": "软件工程专业"
+}u
 ```

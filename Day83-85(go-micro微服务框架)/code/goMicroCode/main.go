@@ -1,22 +1,22 @@
 package main
 
 import (
-	"github.com/micro/go-micro"
-	"goMicroCode/message"
-	"log"
 	"context"
 	"errors"
 	"fmt"
+	"goMicroCode/message"
+	"log"
+
+	"go-micro.dev/v4"
 )
 
-//学生服务管理实现
+// 学生服务管理实现
 type StudentManager struct {
 }
 
-//获取学生信息的服务接口实现
+// 获取学生信息的服务接口实现
 func (sm *StudentManager) GetStudent(ctx context.Context, request *message.StudentRequest, response *message.Student) error {
 
-	//tom
 	studentMap := map[string]message.Student{
 		"davie":  message.Student{Name: "davie", Classes: "软件工程专业", Grade: 80},
 		"steven": message.Student{Name: "steven", Classes: "计算机科学与技术", Grade: 90},

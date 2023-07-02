@@ -31,13 +31,13 @@ func (a *TokenAuthentication) RequireTransportSecurity() bool {
 func main() {
 
 	//TLS连接
-	creds, err := credentials.NewClientTLSFromFile("./keys/server.pem", "go-grpc-example")
+	creds, err := credentials.NewClientTLSFromFile("./keys/server.crt", "")
 	if err != nil {
 		panic(err.Error())
 	}
 
 	auth := TokenAuthentication{
-		AppKey:    "hello1",
+		AppKey:    "hello",
 		AppSecret: "20190812",
 	}
 

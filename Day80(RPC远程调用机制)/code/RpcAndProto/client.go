@@ -14,7 +14,7 @@ func main() {
 		panic(err.Error())
 	}
 	timeStamp := time.Now().Unix()
-	request := message.OrderRequest{OrderId: "201907310003", TimeStamp: timeStamp}
+	request := message.OrderRequest{OrderId: "201907310001", TimeStamp: timeStamp}
 	var response *message.OrderInfo
 	err = client.Call("OrderService.GetOrderInfo", request, &response)
 	if err != nil {

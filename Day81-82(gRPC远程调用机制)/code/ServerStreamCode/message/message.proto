@@ -1,6 +1,8 @@
 syntax = "proto3";
 package message;
 
+option go_package = "./message";
+
 //订单请求参数
 message OrderRequest {
     string orderId = 1;

@@ -2,12 +2,16 @@ package main
 
 import (
 	"log"
-	"github.com/emicklei/go-restful"
-	"github.com/micro/go-micro/web"
+
+	restful "github.com/emicklei/go-restful/v3"
+
 	"MicroApiDemo/proto"
 	"context"
-	"github.com/micro/go-micro/client"
+
 	"fmt"
+
+	"go-micro.dev/v4/client"
+	"go-micro.dev/v4/web"
 )
 
 type Student struct {

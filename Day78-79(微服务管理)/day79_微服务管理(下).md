@@ -171,9 +171,10 @@ docker search consul
 ![docker中查找consul的镜像文件](./img/WX20190621-114548@2x.png)
 
 * **docker pull**
+https://hub.docker.com/_/consul/tags
 
 ```
-docker pull consul
+docker pull consul:1.15
 ```
 通过search查询了consul镜像的相关内容后，可以使用如上的docker pull命令安装consul环境。
 ![Docker安装consul环境](./img/WX20190621-115304@2x.png)
@@ -185,21 +186,13 @@ docker pull consul
 docker images
 ```
 
-![docker中检查是否安装了consul](./img/WX20190621-134602@2x.png)
-
-或者
-
-```
-docker run consul version
-```
-
 ![docker中查看consul版本](./img/WX20190621-115457@2x.png)
 
 ### 2.7、Docker中启动一个单独节点consul agent
 Docker中安装好了consul以后，首先尝试启动一个server节点，可以通过如下命令来启动docker中的单个节点：
 
 ```
-$ docker run -p 8500:8500/tcp consul agent -server -ui -bootstrap-expect=1 -client=0.0.0.0
+$ docker run -p 8500:8500/tcp consul:1.15 agent -server -ui -bootstrap-expect=1 -client=0.0.0.0
 ```
 ![Docker启动单节点server](./img/WX20190711-155259@2x.png)
 
@@ -216,11 +209,11 @@ $ docker run -p 8500:8500/tcp consul agent -server -ui -bootstrap-expect=1 -clie
 在暴露的http端口中，还对应的映射到了主机的端口上，因此，我们可以通过在主机中访问server的信息。比如：
 
 * curl访问HTTP接口：
-    ```
-    curl localhost:8500/v1/catalog/nodes
-    ```
-    
-    ![http端口的映射访问](./img/WX20190621-165728@2x.png)
+```
+curl localhost:8500/v1/catalog/nodes
+
+[{"ID":"beb6e14a-8040-7c52-e47d-c4204b4730c3","Node":"0c8a28998526","Address":"172.17.0.2","Datacenter":"dc1","TaggedAddresses":{"lan":"172.17.0.2","lan_ipv4":"172.17.0.2","wan":"172.17.0.2","wan_ipv4":"172.17.0.2"},"Meta":{"consul-network-segment":""},"CreateIndex":13,"ModifyIndex":15}]
+```
     
 * dig来和DNS接口进行交互：
 
@@ -252,7 +245,7 @@ consul members
 启动第一个节点的时候没有使用了 -bootstrap 参数， 而是使用了 -bootstrap-expect 3, 使用这个参数节点会等到所有三个端都连接到一起了才会启动并且成为一个可用的cluster。
 
 ```go
-$ docker run -d -p 8500:8500 -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_1 consul agent -server -bootstrap -ui -node=1 -client='0.0.0.0'
+$ sudo docker run -d -p 8500:8500 -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_1 consul:1.15 agent -server -bootstrap -ui -node=1 -client='0.0.0.0'
 ```
 对如上的参数做如下说明：
 * ui：表示启动 Web UI 管理器，默认开放端口 8500，可以在浏览器进行访问。
@@ -273,7 +266,7 @@ $docker inspect -f '{{ .NetworkSettings.IPAddress }}' node1
 启动 node2并且告诉他通过 $JOIN_IP 加入到 node1：
 
 ```go
-$ docker run -d -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_2 consul agent -server -node=2  -join='172.17.0.2'
+$ docker run -d -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_2 consul:1.15 agent -server -node=2  -join='172.17.0.2'
 ```
 这里需要对参数作一下说明：
 * CONSUL_BIND_INTERFACE是consul镜像提供给我们的几个常用的环境变量，该常量与-bind作用相同。
@@ -287,7 +280,7 @@ $ docker run -d -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_2 consul ag
 按照同样的方法我们启动 node3：
 
 ```go
-$ docker run -d -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_3 consul agent -server -node=3  -join='172.17.0.2'
+$ docker run -d -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_3 consul:1.15 agent -server -node=3  -join='172.17.0.2'
 ```
 
 现在我们就有了一个拥有3个节点的运行在一台机器上的集群。注意，根据Consul Agent的名字给container起了名字。
@@ -295,11 +288,11 @@ $ docker run -d -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_3 consul ag
 我们没有暴露出任何一个端口用以访问这个集群， 但是我们可以使用第四个agent节点以client的模式（不是用 -server参数）。这意味着他不参与选举但是可以和集群交互。而且这个client模式的agent也不需要磁盘做持久化。
 
 ```go
-$ docker run -d -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_4 consul agent -client -node=4 -join='172.17.0.2' -client='0.0.0.0'
+$ docker run -d -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_4 consul:1.15 agent -client -node=4 -join='172.17.0.2' -client='0.0.0.0'
 
-$ docker run -d -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_5 consul agent -client -node=5 -join='172.17.0.2' -client='0.0.0.0'
+$ docker run -d -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_5 consul:1.15 agent -client -node=5 -join='172.17.0.2' -client='0.0.0.0'
 
-$ docker run -d -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_6 consul agent -client -node=5 -join='172.17.0.2' -client='0.0.0.0'
+$ docker run -d -e CONSUL_BIND_INTERFACE='eth0' --name=consul_server_6 consul:1.15 agent -client -node=5 -join='172.17.0.2' -client='0.0.0.0'
 
 ```
 如果上述命令都能执行成功，就意味着我们的集群搭建成功了。

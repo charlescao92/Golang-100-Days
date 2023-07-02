@@ -39,9 +39,9 @@ func main() {
 	//注册
 	message.RegisterOrderServiceServer(server, new(OrderServiceImpl))
 
-	lis, err := net.Listen("tcp", ":8091")
+	listen, err := net.Listen("tcp", ":8091")
 	if err != nil {
 		panic(err.Error())
 	}
-	server.Serve(lis)
+	server.Serve(listen)
 }

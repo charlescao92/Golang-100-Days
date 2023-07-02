@@ -2,12 +2,13 @@ package main
 
 import (
 	"context"
-	"grpcSSLCode/message"
 	"fmt"
+	"grpcSSLCode/message"
+	"net"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/grpclog"
-	"net"
 )
 
 type MathManager struct {
@@ -18,17 +19,24 @@ func (mm *MathManager) AddMethod(ctx context.Context, request *message.RequestAr
 	result := request.Args1 + request.Args2
 	fmt.Println(" 计算结果是：", result)
 	response = new(message.Response)
-	response.Code = 1;
+	response.Code = 1
 	response.Message = "执行成功"
 	return response, nil
 }
 
 func main() {
 
-	grpc.WithPerRPCCredentials()
+	// 方法1
+	// cert, err := tls.LoadX509KeyPair("./keys/server.crt", "./keys/server.key")
+	// if err != nil {
+	// 	grpclog.Fatal("加载在证书文件失败", err)
+	// }
+	// creds := credentials.NewTLS(&tls.Config{
+	// 	Certificates: []tls.Certificate{cert},
+	// })
 
-	//TLS认证
-	creds, err := credentials.NewServerTLSFromFile("./keys/server.pem", "./keys/server.key")
+	// 方法2
+	creds, err := credentials.NewServerTLSFromFile("./keys/server.crt", "./keys/server.key")
 	if err != nil {
 		grpclog.Fatal("加载在证书文件失败", err)
 	}
